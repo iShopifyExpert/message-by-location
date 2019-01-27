@@ -1,0 +1,101 @@
+{% if section.settings.show-message %}
+<script type="text/javascript">
+  $.ajax({
+    url: 'https://ipapi.co/json',
+    type: 'POST',
+    async: false,
+    contentType: "application/json; charset=utf-8",
+    dataType: 'json',
+    success: function (json) {
+      // output the "city" object and "country"
+      if (json.city) {var city = json.city +', ';} else {var city = '';} {%for block in section.blocks%}{% if forloop.first %}
+      if (json.country.code === '{{block.settings.country_code}}') {
+          $('#country-msg').html('{%if block.settings.message contains '[location]'%}{{block.settings.message | split:'[location]' | first}}<strong>'+city+json.country.name+'</strong>{{block.settings.message | split:'[location]' | last}}{%else%}{{block.settings.message}}{%endif%}');
+      } {%else%} else if (json.country.code === '{{block.settings.country_code}}') {
+          $('#country-msg').html('{%if block.settings.message contains '[location]'%}{{block.settings.message | split:'[location]' | first}}<strong>'+city+json.country.name+'</strong>{{block.settings.message | split:'[location]' | last}}{%else%}{{block.settings.message}}{%endif%}');
+      } {%endif%}{%endfor%} else {
+          $('#country-msg').html('{%if section.settings.default_message contains '[location]'%}{{section.settings.default_message | split:'[location]' | first}}<strong>'+city+json.country.name+'</strong>{{section.settings.default_message | split:'[location]' | last}}{%else%}{{section.settings.default_message}}{%endif%}');
+      }
+    }
+  });
+</script>
+{% endif %}
+{% schema %}
+  {
+    "name": "Show Message by Location",
+    "max_blocks": 50,
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "show-message",
+        "label": "Show Message",
+        "default": true
+      },
+      {
+        "type": "textarea",
+        "id": "default_message",
+        "label": "Default Message for (Worldwide)",
+        "default": "<span><i class='fa fa-bus' aria-hidden='true'></i> Free Shipping to [location].</span><br><span><i class='fa fa-clock-o' aria-hidden='true'></i> Estimate time delivery 2-3 weeks.</span>",
+		"info": "Use '[location]' tag for location between message."
+      }
+    ],
+    "blocks": [
+      {
+        "type": "text",
+        "name": "Country",
+        "settings": [
+          {
+            "type": "text",
+            "id": "country_code",
+            "label": "Country Code",
+            "default": "US",
+			"info": "Use the country's ISO [currency code](http:\/\/www.xe.com\/iso4217.php)."
+          },
+          {
+            "type": "textarea",
+            "id": "message",
+            "label": "Message [location]",
+            "default": "<span><i class='fa fa-bus' aria-hidden='true'></i> Free Shipping to [location].</span><br><span><i class='fa fa-clock-o' aria-hidden='true'></i> Estimate time delivery 2-3 weeks.</span>",
+			"info": "Use '[location]' tag for location between message."
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "Show Message by Location",
+        "category": "Country",
+        "blocks": [
+          {
+            "type": "text"
+          },
+          {
+            "type": "text"
+          }
+        ]
+      }
+    ]
+  }
+{% endschema %}
+{% stylesheet %}
+#country-msg span {
+    display: inline-block;
+    margin: -1px;
+    font-size: 13px;
+    line-height: 30px;
+    padding: 0;
+    width: 100%;
+    max-width: 320px;
+    color: #008a47;
+}
+#country-msg span i {
+    margin-right: 8px;
+}
+#country-msg span img {
+    max-height: 30px;
+    max-width: 30px;
+    padding: 5px 5px;
+    margin-right: 6px;
+    float: left;
+}
+{% endstylesheet %}
